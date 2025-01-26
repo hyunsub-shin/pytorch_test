@@ -1,0 +1,19 @@
+# Virtual Environment
+venv_pytorch/
+data/
+학습결과/
+*.pth
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
