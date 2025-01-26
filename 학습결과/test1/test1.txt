@@ -1,3 +1,4 @@
+epochs 10
 batch 64
 learning rate 0.001
 layer2
