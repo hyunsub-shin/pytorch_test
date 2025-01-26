@@ -71,15 +71,15 @@ def main():
     
     ################################################
     # 하이퍼파라미터 설정
-    num_epochs = 5          # 에포크 수 증가
+    num_epochs = 10          # 에포크 수 증가
     if device.type == 'cuda':
         batch_size = 128         # 배치 사이즈 조정
     else:
-        batch_size = 32         # CPU 사용 시 배치 사이즈 조정 
+        batch_size = 64         # CPU 사용 시 배치 사이즈 조정 
         
     # 학습률 조정 0 ~ 1 사이의 작은 값 사용(예: 0.1, 0.01, 0.001, 0.0001, ...)
     # 큰 학습률: 빠르게 학습, 작은 학습률: 정확도 향상
-    learning_rate = 0.01  
+    learning_rate = 0.001  
     ################################################
         
     # 시스템 정보는 시작할 때 한 번만 출력
@@ -389,10 +389,11 @@ def main():
     plt.grid(True)
 
     plt.tight_layout()
-    plt.show()
     
     # 그래프를 파일로 저장
     plt.savefig('./학습결과/training_results.png')  # 그래프를 'training_results.png'로 저장
+    
+    plt.show()
 
 if __name__ == '__main__':
     freeze_support()  # Windows에서 필요
