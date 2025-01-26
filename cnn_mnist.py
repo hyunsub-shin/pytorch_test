@@ -5,14 +5,14 @@ import torchvision
 import torchvision.transforms as transforms
 from matplotlib import font_manager, rc
 import matplotlib.pyplot as plt
-import platform
+import platform  # 폰트관련 운영체제 확인
 import os
 from PIL import Image
-import json
 import torch.nn.functional as F
 from models.convnet import ConvNet
 import torch.multiprocessing as mp
 from torch.multiprocessing import freeze_support
+import psutil # CPU 메모리 사용량 출력
 
 ##############################################################################################
 # pytorch cuda version 12.1 설치 기준
@@ -64,22 +64,23 @@ def main():
 
     plt.rc('font', family=font_name)
     plt.rcParams['axes.unicode_minus'] = False
-
+    
+    # GPU 사용 가능 여부 확인 및 장치 설정
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu') # cuda 사용시 blue screen 발생
+    
     ################################################
     # 하이퍼파라미터 설정
-    num_epochs = 5          # 에포크 수 증가
-    if torch.cuda.is_available():
+    num_epochs = 10          # 에포크 수 증가
+    if device.type == 'cuda':
         batch_size = 128         # 배치 사이즈 조정
     else:
-        batch_size = 32         # CPU 사용 시 배치 사이즈 조정 
+        batch_size = 64         # CPU 사용 시 배치 사이즈 조정 
         
     # 학습률 조정 0 ~ 1 사이의 작은 값 사용(예: 0.1, 0.01, 0.001, 0.0001, ...)
     # 큰 학습률: 빠르게 학습, 작은 학습률: 정확도 향상
-    learning_rate = 0.01  
+    learning_rate = 0.001  
     ################################################
-
-    # GPU 사용 가능 여부 확인 및 장치 설정
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
     # 시스템 정보는 시작할 때 한 번만 출력
     print("\n=== 시스템 정보 ===")
@@ -87,8 +88,9 @@ def main():
     print(f"현재 PyTorch의 CUDA 버전: {torch.version.cuda}")
     print(f"PyTorch 버전: {torch.__version__}") # 예: '2.0.0+cu117'는 CUDA 11.7 버전을 지원
     print(f'사용 중인 장치: {device}')
+    print('-' * 50)
     
-    if torch.cuda.is_available():        
+    if device.type == 'cuda':        
         print(f'현재 사용 중인 GPU: {torch.cuda.get_device_name(0)}')
         print(f'GPU 메모리 사용량:')
         print(f'할당된 메모리: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB')
@@ -102,6 +104,13 @@ def main():
         torch.cuda.empty_cache()
         # 메모리 할당 모드 설정
         torch.cuda.set_per_process_memory_fraction(0.8)  # GPU 메모리의 80% 사용
+    else:
+        memory_info = psutil.virtual_memory()   # 전체 메모리 정보 가져오기
+        
+        # 전체 메모리, 사용 중인 메모리, 사용 가능한 메모리 출력
+        print(f'전체 메모리: {memory_info.total / (1024 ** 2):.2f} MB')
+        print(f'사용 중인 메모리: {memory_info.used / (1024 ** 2):.2f} MB')
+        print(f'메모리 사용률: {memory_info.percent}%')
         
     # 데이터 전처리 설정
     transform = transforms.Compose([
@@ -135,7 +144,7 @@ def main():
     }
 
     # GPU 사용 가능 여부에 따라 추가 매개변수 설정
-    if torch.cuda.is_available():
+    if device.type == 'cuda':
         train_dataloader_params.update({
             'num_workers': 4,      # CPU 워커 수 증가
             'pin_memory': True,    # CUDA 핀 메모리 사용
@@ -172,19 +181,18 @@ def main():
     # 모델 초기화
     input_height = 28  # 입력 이미지 높이 # transform에서 적용한 사이즈
     input_width = 28   # 입력 이미지 너비 # transform에서 적용한 사이즈
-    model = ConvNet(num_classes, input_height, input_width).to(device)
+    model = ConvNet(device, num_classes, input_height, input_width).to(device)
 
     # 손실 함수와 옵티마이저 정의
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate) # 옵티마이저 변경 테스트(Nesterov, Adadelta, RMSprop, FTRL)
 
     # 학습률을 동적으로 조정
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer,
         mode='min',
         factor=0.1, # 학습률을 1/10로 감소
-        patience=2 # 1번의 에포크 동안 성능 향상이 없으면 학습률 감소
-        # verbose=True  # 학습률 변경 시 메시지 출력
+        patience=2 # 2번의 에포크 동안 성능 향상이 없으면 학습률 감소
     )
     
     ###############################
@@ -263,15 +271,23 @@ def main():
             
             # 메모리 정리 및 사용량 출력 (100 배치마다)
             if (i + 1) % 100 == 0:
-                # 메모리 정리
-                del outputs, loss
-                torch.cuda.empty_cache()
+                del outputs, loss   # 메모리 정리: Tensor 객체 삭제
                 
-                # GPU 메모리 사용량 출력
-                if torch.cuda.is_available():
+                if device.type == 'cuda':
+                    torch.cuda.empty_cache()    # 캐시된 메모리 정리
+                    
+                    # GPU 메모리 사용량 출력
                     print(f'배치 {i+1}/{len(train_loader)} - GPU 메모리:')
                     print(f'할당된 메모리: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB')
                     print(f'캐시된 메모리: {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB')
+                    print('-' * 50)
+                else:
+                    memory_info = psutil.virtual_memory()   # 전체 메모리 정보 가져오기
+                    
+                    # 전체 메모리, 사용 중인 메모리, 사용 가능한 메모리 출력
+                    print(f'전체 메모리: {memory_info.total / (1024 ** 2):.2f} MB')
+                    print(f'사용 중인 메모리: {memory_info.used / (1024 ** 2):.2f} MB')
+                    print(f'메모리 사용률: {memory_info.percent}%')
                     print('-' * 50)
         
         # 에포크당 평균 손실과 정확도 계산
