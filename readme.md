@@ -20,3 +20,6 @@ pytorch_exam/
 ├── download_dataset.py # 학습 데이터 다운로드
 └── predict.py # 예측 스크립트
 ```
+
+## pytorch cuda version 12.1 설치
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
