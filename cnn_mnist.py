@@ -66,8 +66,7 @@ def main():
     plt.rcParams['axes.unicode_minus'] = False
     
     # GPU 사용 가능 여부 확인 및 장치 설정
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu') # cuda 사용시 blue screen 발생
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     ################################################
     # 하이퍼파라미터 설정
