@@ -34,10 +34,10 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 ![1st test](./학습결과/test1/test1.png)
 
 ### 2nd test
-epochs 10
-batch 128
-learning rate 0.001
-layer3
-dropout CNN 0.5, FC 0.5
+- epochs 10
+-  batch 128
+- learning rate 0.001
+- layer3
+- dropout CNN 0.5, FC 0.5
 ![2nd test](./학습결과/test2/test2.png)
 
