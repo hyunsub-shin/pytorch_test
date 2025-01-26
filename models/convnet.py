@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ConvNet(nn.Module):
-    def __init__(self, device, num_classes, input_height, input_width):
+    def __init__(self, num_classes, input_height, input_width):
         super(ConvNet, self).__init__()
         
         # CNN 모델 정의
@@ -64,13 +64,9 @@ class ConvNet(nn.Module):
         self.out_ch_num = 256 # 마지막 layer의 채널 수
         self.flattened_size = self.out_ch_num * (input_height // 4) * (input_width // 4)
         
-        # GPU/CPU에 따른 FC 레이어 설정
-        if device.type == 'cuda':
-            self.fc1 = nn.Linear(self.flattened_size, 1024)
-            self.fc2 = nn.Linear(1024, num_classes)          
-        else:
-            self.fc1 = nn.Linear(self.flattened_size, 512)       
-            self.fc2 = nn.Linear(512, num_classes)
+        # FC 레이어 설정
+        self.fc1 = nn.Linear(self.flattened_size, 512)       
+        self.fc2 = nn.Linear(512, num_classes)
 
         # FC 레이어용 Dropout
         self.dropout = nn.Dropout(0.5) # FC 레이어는 더 높은 dropout 비율 사용

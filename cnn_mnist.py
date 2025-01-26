@@ -75,7 +75,7 @@ def main():
     if device.type == 'cuda':
         batch_size = 128         # 배치 사이즈 조정
     else:
-        batch_size = 128         # CPU 사용 시 배치 사이즈 조정 
+        batch_size = 64         # CPU 사용 시 배치 사이즈 조정 
         
     # 학습률 조정 0 ~ 1 사이의 작은 값 사용(예: 0.1, 0.01, 0.001, 0.0001, ...)
     # 큰 학습률: 빠르게 학습, 작은 학습률: 정확도 향상
@@ -181,7 +181,7 @@ def main():
     # 모델 초기화
     input_height = 28  # 입력 이미지 높이 # transform에서 적용한 사이즈
     input_width = 28   # 입력 이미지 너비 # transform에서 적용한 사이즈
-    model = ConvNet(device, num_classes, input_height, input_width).to(device)
+    model = ConvNet(num_classes, input_height, input_width).to(device)
 
     # 손실 함수와 옵티마이저 정의
     criterion = nn.CrossEntropyLoss()

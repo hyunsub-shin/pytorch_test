@@ -29,7 +29,7 @@ def predict_image(image_path, model_path, data_dir):
     # 모델 초기화
     input_height = 28  # 입력 이미지 높이 # transform에서 적용한 사이즈
     input_width = 28   # 입력 이미지 너비 # transform에서 적용한 사이즈
-    model = ConvNet(device, num_classes, input_height, input_width).to(device)
+    model = ConvNet(num_classes, input_height, input_width).to(device)
     
     # 모델 가중치 로드
     model.load_state_dict(torch.load(model_path, weights_only=True))
@@ -69,8 +69,8 @@ if __name__ == "__main__":
     plt.rcParams['axes.unicode_minus'] = False
     
     # 예측 실행
-    image_path = "./data/dog1.jpg"  # 예측하고 싶은 이미지 경로
-    # image_path = "./data/cat1.jpg"  # 예측하고 싶은 이미지 경로
+    # image_path = "./data/dog.jpg"  # 예측하고 싶은 이미지 경로
+    image_path = "./data/cat.jpg"  # 예측하고 싶은 이미지 경로
     model_path = "trained_model.pth"         # 저장된 모델 경로
     # model_path = "best_model.pth"         # 저장된 모델 경로
     data_dir = "./data"                      # 데이터 디렉토리 경로
