@@ -1,0 +1,5 @@
+epochs 10
+batch 128
+learning rate 0.005
+layer2
+dropout CNN 0.3, FC 0.5

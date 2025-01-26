@@ -26,18 +26,18 @@ class ConvNet(nn.Module):
             nn.BatchNorm2d(256),
             nn.ReLU(),
             nn.MaxPool2d(2),    # 두 번째 pooling layer
-            nn.Dropout2d(0.5)  # CNN용 Dropout
+            nn.Dropout2d(0.3)  # CNN용 Dropout
         )
-        self.layer3 = nn.Sequential(
-            nn.Conv2d(256, 512, kernel_size=3, padding=1),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
-            nn.Conv2d(512, 1024, kernel_size=3, padding=1),
-            nn.BatchNorm2d(1024),
-            nn.ReLU(),
-            nn.MaxPool2d(2),    # 세 번째 pooling layer
-            nn.Dropout2d(0.5)  # CNN용 Dropout
-        )
+        # self.layer3 = nn.Sequential(
+        #     nn.Conv2d(256, 512, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(512),
+        #     nn.ReLU(),
+        #     nn.Conv2d(512, 1024, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(1024),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(2),    # 세 번째 pooling layer
+        #     nn.Dropout2d(0.5)  # CNN용 Dropout
+        # )
         
         # # 입력 이미지가 28x28일 때의 계산
         # # 28x28 -> 14x14 -> 7x7 -> 3x3
@@ -61,16 +61,16 @@ class ConvNet(nn.Module):
             높이: input_height // 8
             너비: input_width // 8
         '''
-        self.out_ch_num = 1024 # 마지막 layer의 채널 수
-        self.flattened_size = self.out_ch_num * (input_height // 8) * (input_width // 8)
+        self.out_ch_num = 256 # 마지막 layer의 채널 수
+        self.flattened_size = self.out_ch_num * (input_height // 4) * (input_width // 4)
         
         # GPU/CPU에 따른 FC 레이어 설정
         if device.type == 'cuda':
-            self.fc1 = nn.Linear(self.flattened_size, 2048)
-            self.fc2 = nn.Linear(2048, num_classes)          
+            self.fc1 = nn.Linear(self.flattened_size, 1024)
+            self.fc2 = nn.Linear(1024, num_classes)          
         else:
-            self.fc1 = nn.Linear(self.flattened_size, 1024)       
-            self.fc2 = nn.Linear(1024, num_classes)
+            self.fc1 = nn.Linear(self.flattened_size, 512)       
+            self.fc2 = nn.Linear(512, num_classes)
 
         # FC 레이어용 Dropout
         self.dropout = nn.Dropout(0.5) # FC 레이어는 더 높은 dropout 비율 사용
@@ -79,7 +79,7 @@ class ConvNet(nn.Module):
         # CNN 레이어 통과
         out = self.layer1(x)
         out = self.layer2(out)
-        out = self.layer3(out)
+        # out = self.layer3(out)
         
         # Flatten
         out = out.view(out.size(0), -1)
