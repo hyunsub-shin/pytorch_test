@@ -1,7 +1,6 @@
 # Virtual Environment
 venv_pytorch/
 data/
-학습결과/
 *.pth
 *.png
 *.jpg
