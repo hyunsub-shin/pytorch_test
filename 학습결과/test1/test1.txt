@@ -1,0 +1,4 @@
+batch 64
+learning rate 0.001
+layer2
+dropout CNN 0.5, FC 0.5
