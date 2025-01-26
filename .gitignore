@@ -2,13 +2,13 @@
 venv_pytorch/
 data/
 *.pth
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.bmp
-*.tiff
-*.ico
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# *.bmp
+# *.tiff
+# *.ico
 
 # Python
 __pycache__/
