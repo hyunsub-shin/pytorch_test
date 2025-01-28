@@ -8,41 +8,51 @@ class ConvNet(nn.Module):
         
         # CNN 모델 정의
         self.layer1 = nn.Sequential(
+            # [3,28,28] -> [32,28,28]
+            # padding 미적용시 out = input - kernel + 1 : 28 -> 26
             nn.Conv2d(3, 32, kernel_size=3, padding=1), #흑백 이미지의 경우 1, 컬러 이미지의 경우 3
             nn.BatchNorm2d(32),
             nn.ReLU(),
+            # [32,28,28] -> [64,28,28]
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
+            # [64,28,28] -> [64,14,14]
             nn.MaxPool2d(2)     # 첫 번째 pooling layer
             # 첫 번째 층에는 Dropout 적용하지 않는 것이 일반적인 권장 사항
             # nn.Dropout2d(0.3)  # CNN용 Dropout
         )
         self.layer2 = nn.Sequential(
+            # [64,14,14] -> [128,14,14]
             nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(),
+            # [128,14,14] -> [256,14,14]
             nn.Conv2d(128, 256, kernel_size=3, padding=1),
             nn.BatchNorm2d(256),
             nn.ReLU(),
+            # [256,14,14] -> [256,7,7]
             nn.MaxPool2d(2),    # 두 번째 pooling layer
             nn.Dropout2d(0.3)  # CNN용 Dropout
         )
         # self.layer3 = nn.Sequential(
+        #     # [256,7,7] -> [512,7,7]
         #     nn.Conv2d(256, 512, kernel_size=3, padding=1),
         #     nn.BatchNorm2d(512),
         #     nn.ReLU(),
+        #     # [512,7,7] -> [1024,7,7]
         #     nn.Conv2d(512, 1024, kernel_size=3, padding=1),
         #     nn.BatchNorm2d(1024),
         #     nn.ReLU(),
+        #     # [1024,7,7] -> [1024,3,3]
         #     nn.MaxPool2d(2),    # 세 번째 pooling layer
         #     nn.Dropout2d(0.5)  # CNN용 Dropout
         # )
         
         # # 입력 이미지가 28x28일 때의 계산
         # # 28x28 -> 14x14 -> 7x7 -> 3x3
-        # # 따라서 마지막 특성 맵의 크기는 128 * 3 * 3
-        # self.fc1 = nn.Linear(128 * 3 * 3, 2048)
+        # # 따라서 마지막 특성 맵의 크기는 1024 * 3 * 3
+        # self.fc1 = nn.Linear(1024 * 3 * 3, 2048)
         # self.fc2 = nn.Linear(2048, num_classes)
         # self.dropout = nn.Dropout(0.5)
         
@@ -78,6 +88,7 @@ class ConvNet(nn.Module):
         # out = self.layer3(out)
         
         # Flatten
+        # out.size(0) => batch_size를 나타냄
         out = out.view(out.size(0), -1)
         
         # FC 레이어 통과
