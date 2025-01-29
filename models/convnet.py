@@ -9,7 +9,7 @@ class ConvNet(nn.Module):
         # CNN 모델 정의
         self.layer1 = nn.Sequential(
             # [3,28,28] -> [32,28,28]
-            # padding 미적용시 out = input - kernel + 1 : 28 -> 26
+            # out = (input - kernel + 2*padding)/stride + 1 : 28 -> 26
             nn.Conv2d(3, 32, kernel_size=3, padding=1), #흑백 이미지의 경우 1, 컬러 이미지의 경우 3
             nn.BatchNorm2d(32),
             nn.ReLU(),
