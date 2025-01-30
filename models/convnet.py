@@ -9,12 +9,12 @@ class ConvNet(nn.Module):
         # CNN 모델 정의
         self.layer1 = nn.Sequential(
             # [3,28,28] -> [32,28,28]
-            # out = (input - kernel + 2*padding)/stride + 1 : 28 -> 26
-            nn.Conv2d(3, 32, kernel_size=3, padding=1), #흑백 이미지의 경우 1, 컬러 이미지의 경우 3
+            # out = (input - kernel + 2*padding)/stride + 1 : 28 -> 28
+            nn.Conv2d(3, 32, kernel_size=5, padding=2), #흑백 이미지의 경우 1, 컬러 이미지의 경우 3
             nn.BatchNorm2d(32),
             nn.ReLU(),
             # [32,28,28] -> [64,28,28]
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.Conv2d(32, 64, kernel_size=5, padding=2),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             # [64,28,28] -> [64,14,14]
@@ -24,11 +24,11 @@ class ConvNet(nn.Module):
         )
         self.layer2 = nn.Sequential(
             # [64,14,14] -> [128,14,14]
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.Conv2d(64, 128, kernel_size=5, padding=2),
             nn.BatchNorm2d(128),
             nn.ReLU(),
             # [128,14,14] -> [256,14,14]
-            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.Conv2d(128, 256, kernel_size=5, padding=2),
             nn.BatchNorm2d(256),
             nn.ReLU(),
             # [256,14,14] -> [256,7,7]
@@ -37,11 +37,11 @@ class ConvNet(nn.Module):
         )
         self.layer3 = nn.Sequential(
             # [256,7,7] -> [512,7,7]
-            nn.Conv2d(256, 512, kernel_size=3, padding=1),
+            nn.Conv2d(256, 512, kernel_size=5, padding=2),
             nn.BatchNorm2d(512),
             nn.ReLU(),
             # [512,7,7] -> [1024,7,7]
-            nn.Conv2d(512, 1024, kernel_size=3, padding=1),
+            nn.Conv2d(512, 1024, kernel_size=5, padding=2),
             nn.BatchNorm2d(1024),
             nn.ReLU(),
             # [1024,7,7] -> [1024,3,3]

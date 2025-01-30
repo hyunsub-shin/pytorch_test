@@ -81,12 +81,12 @@ def main():
     # 큰 학습률: 빠르게 학습, 작은 학습률: 정확도 향상
     learning_rate = 0.0005  
     ################################################
-        
+    
     # 시스템 정보는 시작할 때 한 번만 출력
     print("\n=== 시스템 정보 ===")
     print(f"CUDA 사용 가능 여부: {torch.cuda.is_available()}")
     print(f"현재 PyTorch의 CUDA 버전: {torch.version.cuda}")
-    print(f"PyTorch 버전: {torch.__version__}") # 예: '2.0.0+cu117'는 CUDA 11.7 버전을 지원
+    print(f"PyTorch 버전: {torch.__version__}") # 예: '2.0.0+cu121'는 CUDA 12.1 버전을 지원
     print(f'사용 중인 장치: {device}')
     print('-' * 50)
     

@@ -1,0 +1,95 @@
+- epochs 10
+- batch 64
+- learning rate 0.0005
+- layer3
+- kernal size 5
+- dropout CNN 0.3, FC 0.5
+
+입력 이미지 (3채널, 28 x 28)
+        |
+        v
+    Conv2d (3 -> 32, kernel_size=5, padding=2)
+        |
+        v
+    BatchNorm2d
+        |
+        v
+    ReLU
+        |
+        v
+    Conv2d (32 -> 64, kernel_size=5, padding=2)
+        |
+        v
+    BatchNorm2d
+        |
+        v
+    ReLU
+        |
+        v
+    MaxPool2d (2x2)
+        |
+        v
+    Conv2d (64 -> 128, kernel_size=5, padding=2)
+        |
+        v
+    BatchNorm2d
+        |
+        v
+    ReLU
+        |
+        v
+    Conv2d (128 -> 256, kernel_size=5, padding=2)
+        |
+        v
+    BatchNorm2d
+        |
+        v
+    ReLU
+        |
+        v
+    MaxPool2d (2x2)
+        |
+        v
+    Dropout2d (0.3)
+        |
+        v
+    Conv2d (256 -> 512, kernel_size=5, padding=2)
+        |
+        v
+    BatchNorm2d
+        |
+        v
+    ReLU
+        |
+        v
+    Conv2d (512 -> 1024, kernel_size=5, padding=2)
+        |
+        v
+    BatchNorm2d
+        |
+        v
+    ReLU
+        |
+        v
+    MaxPool2d (2x2)
+        |
+        v
+    Dropout2d (0.3)
+        |
+        v
+    Flatten
+        |
+        v
+    Linear (1024 * H' * W' -> 512)  # H'와 W'는 최종 특성 맵의 크기
+        |
+        v
+    ReLU
+        |
+        v
+    Dropout (0.5)
+        |
+        v
+    Linear (512 -> num_classes)
+        |
+        v
+    출력 (num_classes)

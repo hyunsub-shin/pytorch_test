@@ -33,6 +33,8 @@ def predict_image(image_path, model_path, data_dir):
     
     # 모델 가중치 로드
     model.load_state_dict(torch.load(model_path, weights_only=True))
+    # print("model: ", model)
+    
     model.eval()
     
     # 이미지 로드 및 변환

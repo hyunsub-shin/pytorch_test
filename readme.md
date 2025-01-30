@@ -64,3 +64,13 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 - layer3
 - dropout CNN 0.3, FC 0.5
 ![5th test](./학습결과/test5/test5.png)
+
+### 6th test: test_datashet에서는 데이터 증강 미적용
+- epochs 10
+- batch 64
+- learning rate 0.0005
+- layer3
+- kernal size 5
+- dropout CNN 0.3, FC 0.5
+![6th test](./학습결과/test6/test6.png)
+
