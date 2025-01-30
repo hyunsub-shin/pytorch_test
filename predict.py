@@ -35,6 +35,7 @@ def predict_image(image_path, model_path, data_dir):
     model.load_state_dict(torch.load(model_path, weights_only=True))
     # print("model: ", model)
     
+    # 모델 평가 모드로 설정
     model.eval()
     
     # 이미지 로드 및 변환
@@ -71,9 +72,9 @@ if __name__ == "__main__":
     plt.rcParams['axes.unicode_minus'] = False
     
     # 예측 실행
-    # image_path = "./data/dog1.jpg"  # 예측하고 싶은 이미지 경로
-    # image_path = "./data/cat1.jpg"  # 예측하고 싶은 이미지 경로
-    image_path = "./data/bird.jpg"  # 예측하고 싶은 이미지 경로
+    # image_path = "./data/dog.jpg"  # 예측하고 싶은 이미지 경로
+    image_path = "./data/cat1.jpg"  # 예측하고 싶은 이미지 경로
+    # image_path = "./data/bird.jpg"  # 예측하고 싶은 이미지 경로
     model_path = "trained_model.pth"         # 저장된 모델 경로
     # model_path = "best_model.pth"         # 저장된 모델 경로
     data_dir = "./data"                      # 데이터 디렉토리 경로
