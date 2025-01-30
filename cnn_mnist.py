@@ -113,7 +113,7 @@ def main():
         print(f'메모리 사용률: {memory_info.percent}%')
         
     # 데이터 전처리 설정
-    transform = transforms.Compose([
+    transform_train = transforms.Compose([
         transforms.Resize((28, 28)),
         transforms.RandomHorizontalFlip(),  # 좌우 반전
         transforms.RandomRotation(10),      # 회전
@@ -123,17 +123,24 @@ def main():
                             std=[0.229, 0.224, 0.225])
     ])
 
+    transform_test = transforms.Compose([
+        transforms.Resize((28, 28)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],  # ImageNet 평균/표준편차 사용
+                            std=[0.229, 0.224, 0.225])
+    ])
+
     # 커스텀 데이터셋 로드
     train_dataset = CustomDataset(
         data_dir='./data',
         dataset_type='train',
-        transform=transform
+        transform=transform_train
     )
 
     test_dataset = CustomDataset(
         data_dir='./data',
         dataset_type='test',
-        transform=transform
+        transform=transform_test  # 증강 없이 기본 전처리만 적용
     )
 
     # train_loader DataLoader 매개변수 미리 설정
