@@ -71,11 +71,11 @@ def main():
     
     ################################################
     # 하이퍼파라미터 설정
-    num_epochs = 10          # 에포크 수 증가
+    num_epochs = 10              # 에포크 수 증가
     if device.type == 'cuda':
         batch_size = 128         # 배치 사이즈 조정
     else:
-        batch_size = 64         # CPU 사용 시 배치 사이즈 조정 
+        batch_size = 64          # CPU 사용 시 배치 사이즈 조정 
         
     # 학습률 조정 0 ~ 1 사이의 작은 값 사용(예: 0.1, 0.01, 0.001, 0.0001, ...)
     # 큰 학습률: 빠르게 학습, 작은 학습률: 정확도 향상
@@ -352,6 +352,25 @@ def main():
     torch.save(model.state_dict(), 'trained_model.pth')
     print('모델이 저장되었습니다.')
 
+    # ##################################################################
+    # # 모델 가중치 출력 
+    # weights = model.state_dict()
+    # # 레이어 1, 2, 3, FC 레이어의 가중치 출력
+    # print("Layer 1 : ", weights['layer1.0.weight'])
+    # print("Layer 2 : ", weights['layer2.0.weight'])
+    # print("Layer 3 : ", weights['layer3.0.weight'])
+    # print("FC 1 : ", weights['fc1.weight'])
+    # print("FC 2 : ", weights['fc2.weight'])
+
+    # # 첫 번째 Conv2d 레이어의 가중치 시각화
+    # weights_layer1 = weights['layer1.0.weight'].cpu().detach().numpy()
+    # # 첫 번째 필터의 가중치 시각화
+    # plt.imshow(weights_layer1[0, 0, :, :], cmap='gray')  # 첫 번째 필터의 첫 번째 채널
+    # plt.colorbar()
+    # plt.title('First Filter of First Conv Layer')
+    # plt.show()
+    # ##################################################################
+        
     # 테스트
     model.eval()
     with torch.no_grad():
