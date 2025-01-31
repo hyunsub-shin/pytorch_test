@@ -13,6 +13,7 @@ from models.convnet import ConvNet
 import torch.multiprocessing as mp
 from torch.multiprocessing import freeze_support
 import psutil # CPU 메모리 사용량 출력
+from tqdm import tqdm
 
 ##############################################################################################
 # pytorch cuda version 12.1 설치 기준
@@ -225,7 +226,9 @@ def main():
         
         accumulation_steps = 4  # 그래디언트 누적 스텝 수
 
-        for i, (images, labels) in enumerate(train_loader):
+        # for i, (images, labels) in enumerate(train_loader):
+        # # tqdm으로 학습 진행 상황 표시
+        for i, (images, labels) in enumerate(tqdm(train_loader, desc=f'Epoch {epoch+1}/{num_epochs}', unit='batch')):
             images = images.to(device)
             labels = labels.to(device)
             
