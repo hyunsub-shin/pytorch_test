@@ -66,16 +66,13 @@ def main():
     plt.rcParams['axes.unicode_minus'] = False
     
     # GPU 사용 가능 여부 확인 및 장치 설정
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu') # cuda 사용시 blue screen 발생
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cpu') # cuda 사용시 blue screen 발생
     
     ################################################
     # 하이퍼파라미터 설정
-    num_epochs = 10              # 에포크 수 증가
-    if device.type == 'cuda':
-        batch_size = 128         # 배치 사이즈 조정
-    else:
-        batch_size = 64          # CPU 사용 시 배치 사이즈 조정 
+    num_epochs = 10     # 에포크 수 증가
+    batch_size = 64     # CPU 사용 시 배치 사이즈 조정 
         
     # 학습률 조정 0 ~ 1 사이의 작은 값 사용(예: 0.1, 0.01, 0.001, 0.0001, ...)
     # 큰 학습률: 빠르게 학습, 작은 학습률: 정확도 향상
@@ -261,41 +258,41 @@ def main():
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             
-            # # for debug
-            # # 매 배치마다 진행상황 출력 (100개 단위 대신)
-            # print(f'에포크 [{epoch+1}/{num_epochs}], '
-            #       f'스텝 [{i+1}/{len(train_loader)}], '
-            #       f'배치 크기: {labels.size(0)}, '
-            #       f'현재 손실: {loss.item():.4f}, '
-            #       f'현재 정확도: {100 * (predicted == labels).sum().item() / labels.size(0):.2f}%')
-            
-            # # 현재까지의 누적 통계도 출력
-            # print(f'누적 통계 - 전체 샘플: {total}, '
-            #       f'정답 개수: {correct}, '
-            #       f'평균 손실: {running_loss/(i+1):.4f}, '
-            #       f'평균 정확도: {100 * correct/total:.2f}%')
-            # print('-' * 80)  # 구분선 출력
-            
-            # 메모리 정리 및 사용량 출력 (100 배치마다)
-            if (i + 1) % 100 == 0:
-                del outputs, loss   # 메모리 정리: Tensor 객체 삭제
+            # for debug
+            # 100 배치마다 진행상황 출력
+            if (i + 1) % 100 == 0: 
+                print(f'배치 [{i+1}/{len(train_loader)}], '
+                    f'배치 크기: {labels.size(0)}, '
+                    f'현재 손실: {loss.item():.4f}, '
+                    f'현재 정확도: {100 * (predicted == labels).sum().item() / labels.size(0):.2f}%')
                 
-                if device.type == 'cuda':
-                    torch.cuda.empty_cache()    # 캐시된 메모리 정리
+                # 현재까지의 누적 통계도 출력
+                print(f'누적 통계 - 전체 샘플: {total}, '
+                    f'정답 개수: {correct}, '
+                    f'평균 손실: {running_loss/(i+1):.4f}, '
+                    f'평균 정확도: {100 * correct/total:.2f}%')
+                print('-' * 80)  # 구분선 출력
+            
+            # # 메모리 정리 및 사용량 출력 (100 배치마다)
+            # if (i + 1) % 100 == 0:
+            #     del outputs, loss   # 메모리 정리: Tensor 객체 삭제
+                
+            #     if device.type == 'cuda':
+            #         torch.cuda.empty_cache()    # 캐시된 메모리 정리
                     
-                    # GPU 메모리 사용량 출력
-                    print(f'배치 {i+1}/{len(train_loader)} - GPU 메모리:')
-                    print(f'할당된 메모리: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB')
-                    print(f'캐시된 메모리: {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB')
-                    print('-' * 50)
-                else:
-                    memory_info = psutil.virtual_memory()   # 전체 메모리 정보 가져오기
+            #         # GPU 메모리 사용량 출력
+            #         print(f'배치 {i+1}/{len(train_loader)} - GPU 메모리:')
+            #         print(f'할당된 메모리: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB')
+            #         print(f'캐시된 메모리: {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB')
+            #         print('-' * 50)
+            #     else:
+            #         memory_info = psutil.virtual_memory()   # 전체 메모리 정보 가져오기
                     
-                    # 전체 메모리, 사용 중인 메모리, 사용 가능한 메모리 출력
-                    print(f'전체 메모리: {memory_info.total / (1024 ** 2):.2f} MB')
-                    print(f'사용 중인 메모리: {memory_info.used / (1024 ** 2):.2f} MB')
-                    print(f'메모리 사용률: {memory_info.percent}%')
-                    print('-' * 50)
+            #         # 전체 메모리, 사용 중인 메모리, 사용 가능한 메모리 출력
+            #         print(f'전체 메모리: {memory_info.total / (1024 ** 2):.2f} MB')
+            #         print(f'사용 중인 메모리: {memory_info.used / (1024 ** 2):.2f} MB')
+            #         print(f'메모리 사용률: {memory_info.percent}%')
+            #         print('-' * 50)
         
         # 에포크당 평균 손실과 정확도 계산
         train_loss = running_loss / len(train_loader)
@@ -377,22 +374,7 @@ def main():
     # plt.title('First Filter of First Conv Layer')
     # plt.show()
     # ##################################################################
-        
-    # 테스트
-    model.eval()
-    with torch.no_grad():
-        correct = 0
-        total = 0
-        for images, labels in test_loader:
-            images = images.to(device)
-            labels = labels.to(device)
-            outputs = model(images)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-
-        print(f'테스트 정확도: {100 * correct / total:.2f}%')
-
+    
     # 학습 과정 시각화
     plt.figure(figsize=(12, 4))
 
