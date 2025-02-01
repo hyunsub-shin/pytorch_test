@@ -9,6 +9,10 @@ from PIL import Image
 import platform # 폰트관련 운영체제 확인
 
 def predict_image(image_path, model_path, data_dir):
+    # 파라메터 설정
+    input_height = 28  # 입력 이미지 높이
+    input_width = 28   # 입력 이미지 너비
+
     # 장치 설정
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'사용 장치: {device}')
@@ -21,14 +25,12 @@ def predict_image(image_path, model_path, data_dir):
       
     # 이미지 전처리
     transform = transforms.Compose([
-        transforms.Resize((28, 28)),
+        transforms.Resize((input_height, input_width)),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     
     # 모델 초기화
-    input_height = 28  # 입력 이미지 높이 # transform에서 적용한 사이즈
-    input_width = 28   # 입력 이미지 너비 # transform에서 적용한 사이즈
     model = ConvNet(num_classes, input_height, input_width).to(device)
     
     # 모델 가중치 로드
@@ -72,12 +74,13 @@ if __name__ == "__main__":
     plt.rcParams['axes.unicode_minus'] = False
     
     # 예측 실행
-    # image_path = "./data/dog.jpg"  # 예측하고 싶은 이미지 경로
-    image_path = "./data/cat1.jpg"  # 예측하고 싶은 이미지 경로
+    image_path = "./data/dog1.jpg"  # 예측하고 싶은 이미지 경로
+    # image_path = "./data/cat1.jpg"  # 예측하고 싶은 이미지 경로
     # image_path = "./data/bird.jpg"  # 예측하고 싶은 이미지 경로
-    model_path = "trained_model.pth"         # 저장된 모델 경로
-    # model_path = "best_model.pth"         # 저장된 모델 경로
+    # model_path = "trained_model.pth"         # 저장된 모델 경로
+    model_path = "fine_tuned_model.pth"         # 저장된 모델 경로
     data_dir = "./data"                      # 데이터 디렉토리 경로
+    # data_dir = "./data/transfer_learn" 
     
     predicted_class, probabilities, classes = predict_image(image_path, model_path, data_dir)
     

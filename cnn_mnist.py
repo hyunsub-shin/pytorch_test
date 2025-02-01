@@ -55,7 +55,7 @@ class CustomDataset(torch.utils.data.Dataset):
         return image, label
 
 def main():
-    # 한글 폰트 설정
+    # plot용 한글 폰트 설정
     if platform.system() == 'Windows':
         font_name = 'Malgun Gothic'
     elif platform.system() == 'Darwin':
@@ -72,12 +72,18 @@ def main():
     
     ################################################
     # 하이퍼파라미터 설정
-    num_epochs = 100     # 에포크 수 조정
-    batch_size = 64     # 배치 사이즈 조정 
-        
+    num_epochs = 30     # 에포크 수 조정
+    batch_size = 32     # 배치 사이즈 조정 
+    
     # 학습률 조정 0 ~ 1 사이의 작은 값 사용(예: 0.1, 0.01, 0.001, 0.0001, ...)
     # 큰 학습률: 빠르게 학습, 작은 학습률: 정확도 향상
     learning_rate = 0.0005  
+
+    accumulation_steps = 4  # 그래디언트 누적 스텝 수
+
+    # ConvNet 입력 이미지 크기 설정
+    input_height = 28   # 입력 이미지 높이
+    input_width = 28    # 입력 이미지 너비
     ################################################
     
     # 시스템 정보는 시작할 때 한 번만 출력
@@ -112,7 +118,7 @@ def main():
         
     # 데이터 전처리 설정
     transform_train = transforms.Compose([
-        transforms.Resize((28, 28)),
+        transforms.Resize((input_height, input_width)),
         transforms.RandomHorizontalFlip(),  # 좌우 반전
         transforms.RandomRotation(10),      # 회전
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1), # 밝기, 대비, 채도, 색조 조정
@@ -122,7 +128,7 @@ def main():
     ])
 
     transform_test = transforms.Compose([
-        transforms.Resize((28, 28)),
+        transforms.Resize((input_height, input_width)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406],  # ImageNet 평균/표준편차 사용
                             std=[0.229, 0.224, 0.225])
@@ -184,8 +190,6 @@ def main():
     print(f'라벨 범위: {min(train_dataset.labels)} ~ {max(train_dataset.labels)}')
 
     # 모델 초기화
-    input_height = 28  # 입력 이미지 높이 # transform에서 적용한 사이즈
-    input_width = 28   # 입력 이미지 너비 # transform에서 적용한 사이즈
     model = ConvNet(num_classes, input_height, input_width).to(device)
 
     # 손실 함수와 옵티마이저 정의
@@ -223,8 +227,6 @@ def main():
         running_loss = 0.0
         correct = 0
         total = 0
-        
-        accumulation_steps = 4  # 그래디언트 누적 스텝 수
 
         # for i, (images, labels) in enumerate(train_loader):
         # # tqdm으로 학습 진행 상황 표시
