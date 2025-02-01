@@ -72,7 +72,7 @@ def main():
     
     ################################################
     # 하이퍼파라미터 설정
-    num_epochs = 10     # 에포크 수 조정
+    num_epochs = 100     # 에포크 수 조정
     batch_size = 64     # 배치 사이즈 조정 
         
     # 학습률 조정 0 ~ 1 사이의 작은 값 사용(예: 0.1, 0.01, 0.001, 0.0001, ...)
@@ -261,41 +261,41 @@ def main():
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             
-            # for debug
-            # 100 배치마다 진행상황 출력
-            if (i + 1) % 100 == 0: 
-                print(f'배치 [{i+1}/{len(train_loader)}], '
-                    f'배치 크기: {labels.size(0)}, '
-                    f'현재 손실: {loss.item():.4f}, '
-                    f'현재 정확도: {100 * (predicted == labels).sum().item() / labels.size(0):.2f}%')
+            # # for debug
+            # # 100 배치마다 진행상황 출력
+            # if (i + 1) % 100 == 0: 
+            #     print(f'배치 [{i+1}/{len(train_loader)}], '
+            #         f'배치 크기: {labels.size(0)}, '
+            #         f'현재 손실: {loss.item():.4f}, '
+            #         f'현재 정확도: {100 * (predicted == labels).sum().item() / labels.size(0):.2f}%')
                 
-                # 현재까지의 누적 통계도 출력
-                print(f'누적 통계 - 전체 샘플: {total}, '
-                    f'정답 개수: {correct}, '
-                    f'평균 손실: {running_loss/(i+1):.4f}, '
-                    f'평균 정확도: {100 * correct/total:.2f}%')
-                print('-' * 80)  # 구분선 출력
+            #     # 현재까지의 누적 통계도 출력
+            #     print(f'누적 통계 - 전체 샘플: {total}, '
+            #         f'정답 개수: {correct}, '
+            #         f'평균 손실: {running_loss/(i+1):.4f}, '
+            #         f'평균 정확도: {100 * correct/total:.2f}%')
+            #     print('-' * 80)  # 구분선 출력
             
-            # # 메모리 정리 및 사용량 출력 (100 배치마다)
-            # if (i + 1) % 100 == 0:
-            #     del outputs, loss   # 메모리 정리: Tensor 객체 삭제
+            # 메모리 정리 및 사용량 출력 (100 배치마다)
+            if (i + 1) % 100 == 0:
+                del outputs, loss   # 메모리 정리: Tensor 객체 삭제
                 
-            #     if device.type == 'cuda':
-            #         torch.cuda.empty_cache()    # 캐시된 메모리 정리
+                if device.type == 'cuda':
+                    torch.cuda.empty_cache()    # 캐시된 메모리 정리
                     
-            #         # GPU 메모리 사용량 출력
-            #         print(f'배치 {i+1}/{len(train_loader)} - GPU 메모리:')
-            #         print(f'할당된 메모리: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB')
-            #         print(f'캐시된 메모리: {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB')
-            #         print('-' * 50)
-            #     else:
-            #         memory_info = psutil.virtual_memory()   # 전체 메모리 정보 가져오기
+                #     # GPU 메모리 사용량 출력
+                #     print(f'배치 {i+1}/{len(train_loader)} - GPU 메모리:')
+                #     print(f'할당된 메모리: {torch.cuda.memory_allocated(0) / 1024**2:.2f} MB')
+                #     print(f'캐시된 메모리: {torch.cuda.memory_reserved(0) / 1024**2:.2f} MB')
+                #     print('-' * 50)
+                # else:
+                #     memory_info = psutil.virtual_memory()   # 전체 메모리 정보 가져오기
                     
-            #         # 전체 메모리, 사용 중인 메모리, 사용 가능한 메모리 출력
-            #         print(f'전체 메모리: {memory_info.total / (1024 ** 2):.2f} MB')
-            #         print(f'사용 중인 메모리: {memory_info.used / (1024 ** 2):.2f} MB')
-            #         print(f'메모리 사용률: {memory_info.percent}%')
-            #         print('-' * 50)
+                #     # 전체 메모리, 사용 중인 메모리, 사용 가능한 메모리 출력
+                #     print(f'전체 메모리: {memory_info.total / (1024 ** 2):.2f} MB')
+                #     print(f'사용 중인 메모리: {memory_info.used / (1024 ** 2):.2f} MB')
+                #     print(f'메모리 사용률: {memory_info.percent}%')
+                #     print('-' * 50)
         
         # 에포크당 평균 손실과 정확도 계산
         train_loss = running_loss / len(train_loader)
@@ -323,9 +323,9 @@ def main():
         # 검증 손실에 따라 학습률 조정
         scheduler.step(val_loss)
 
-        # 현재 학습률 출력 for debug
-        current_lr = scheduler.get_last_lr()[0]  # 현재 학습률 가져오기
-        print(f'현재 학습률: {current_lr:.6f}')
+        # # 현재 학습률 출력 for debug
+        # current_lr = scheduler.get_last_lr()[0]  # 현재 학습률 가져오기
+        # print(f'현재 학습률: {current_lr:.6f}')
 
         ###############################
         # 검증 손실에 따른 조기 종료 검사
@@ -341,17 +341,29 @@ def main():
                 print(f'조기 종료: {epoch+1} 에포크에서 학습 중단')
                 break
         
-        print(f'에포크 [{epoch+1}/{num_epochs}]: '
-              f'훈련 손실={train_loss:.4f}, 훈련 정확도={train_acc:.2f}%, '
-              f'검증 손실={val_loss:.4f}, 검증 정확도={val_acc:.2f}%')
-        print(f'Gap: {abs(train_acc - val_acc):.2f}%')
-        print('=' * 50)
+        # ##############################
+        # # for Debug 학습 진행중 표시
+        # ##############################
+        # print(f'에포크 [{epoch+1}/{num_epochs}]: '
+        #       f'훈련 손실={train_loss:.4f}, 훈련 정확도={train_acc:.2f}%, '
+        #       f'검증 손실={val_loss:.4f}, 검증 정확도={val_acc:.2f}%')
+        # print(f'Gap: {abs(train_acc - val_acc):.2f}%')
+        # print('=' * 50)
 
         train_losses.append(train_loss)  # 에포크당 평균 손실 추가
         val_losses.append(val_loss)      # 에포크당 평균 검증 손실 추가
         
         train_accuracies.append(train_acc)     # 에포크당 평균 정확도 추가 
         val_accuracies.append(val_acc)         # 에포크당 평균 검증 정확도 추가
+
+    ############################
+    # for debug 학습 완료후 표시
+    ############################
+    print(f'에포크 [{epoch+1}/{num_epochs}]: '
+            f'훈련 손실={train_loss:.4f}, 훈련 정확도={train_acc:.2f}%, '
+            f'검증 손실={val_loss:.4f}, 검증 정확도={val_acc:.2f}%')
+    print(f'Gap: {abs(train_acc - val_acc):.2f}%')
+    print('=' * 80)
 
     print('학습 완료!')
 

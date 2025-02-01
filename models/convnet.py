@@ -75,8 +75,9 @@ class ConvNet(nn.Module):
         self.flattened_size = self.out_ch_num * (input_height // 8) * (input_width // 8)
         
         # FC 레이어 설정
-        self.fc1 = nn.Linear(self.flattened_size, 512)       
-        self.fc2 = nn.Linear(512, num_classes)
+        self.fc1 = nn.Linear(self.flattened_size, 512)  
+        self.fc2 = nn.Linear(512, 128)
+        self.fc3 = nn.Linear(128, num_classes)
 
         # FC 레이어용 Dropout
         self.dropout = nn.Dropout(0.5) # FC 레이어는 더 높은 dropout 비율 사용
@@ -95,6 +96,9 @@ class ConvNet(nn.Module):
         out = self.fc1(out)
         out = F.relu(out)
         out = self.dropout(out) # FC 레이어 후에 dropout 적용
-        out = self.fc2(out)  #마지막 레이어에는 dropout 적용하지 않음
+        out = self.fc2(out)     
+        out = F.relu(out)
+        out = self.dropout(out)
+        out = self.fc3(out)     #마지막 레이어에는 dropout 적용하지 않음
         
         return out
