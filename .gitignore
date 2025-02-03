@@ -1,6 +1,7 @@
 # Virtual Environment
-venv_pytorch/
+venv_torch/
 data/
+predict.py
 *.pth
 # *.png
 # *.jpg
