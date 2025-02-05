@@ -103,9 +103,11 @@ class ConvNet(nn.Module):
         
         return out
 
+# Fully Convolutional Network
 class FCN(nn.Module):
     def __init__(self, num_classes):
         super(FCN, self).__init__()
+        
         # Convolutional Layers
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, padding=1)
         self.relu1 = nn.ReLU(inplace=True)
@@ -133,3 +135,84 @@ class FCN(nn.Module):
         out = self.upsample(out)
 
         return out
+
+# transfer FCN(if pretrained_cnn) or ConvNet + FCN(if not pretrained_cnn)
+class FCNN(nn.Module):
+    def __init__(self, num_classes, input_height, input_width, pretrained_cnn=None):
+        super(FCNN, self).__init__()
+
+        if pretrained_cnn:
+            # retrained model이 있을 경우 pretrained model layer를 가져옴
+            self.features = nn.Sequential(*list(pretrained_cnn.children())[:-3])    # 마지막 fc layer 3개 제거
+        else:
+            # ConvNet의 convolutional layer 부분 복사 (layer1, layer2, layer3)
+            self.features = nn.Sequential()
+
+        # 1x1 Convolution Layer (FC Layer 대체) - 채널 수 조절
+        self.conv4 = nn.Conv2d(1024, 512, kernel_size=1)  # 채널 수 1024 -> 512
+        self.relu4 = nn.ReLU(inplace=True)
+        self.dropout4 = nn.Dropout2d(0.3)
+
+        self.conv5 = nn.Conv2d(512, 256, kernel_size=1) # 채널 수 512 -> 256
+        self.relu5 = nn.ReLU(inplace=True)
+        self.dropout5 = nn.Dropout2d(0.3)
+
+        self.classifier = nn.Conv2d(256, num_classes, kernel_size=1) # 마지막 채널은 num_classes
+
+        # Upsampling Layer (Deconvolution) - 필요에 따라 조절
+        self.upsample = nn.ConvTranspose2d(num_classes, num_classes, kernel_size=16, stride=8, padding=4) # kernel size, stride, padding 조절
+
+        # 입력 이미지 크기 저장
+        self.input_height = input_height
+        self.input_width = input_width
+
+    def forward(self, x):
+        # ConvNet의 convolutional layer 통과
+        out = self.features(x) # self.layer1, self.layer2, self.layer3(x) 대체
+
+        # 1x1 Convolutional Layer
+        out = self.conv4(out)
+        out = self.relu4(out)
+        out = self.dropout4(out)
+
+        out = self.conv5(out)
+        out = self.relu5(out)
+        out = self.dropout5(out)
+
+        # Classification (1x1 conv)
+        out = self.classifier(out)
+
+        # Upsampling
+        out = self.upsample(out)
+
+        return out
+
+def create_fcn_transfer_model(num_classes, input_height, input_width, pretrained_model_path=None):
+    # 1. ConvNet 모델 생성 (pre-training된 weight가 있다면 load)
+    if pretrained_model_path:
+        cnn_model = ConvNet(num_classes, input_height, input_width) # num_classes는 임시 값
+        cnn_model.load_state_dict(torch.load(pretrained_model_path))
+
+        # FCN 모델 생성 (ConvNet의 convolutional layer 부분 복사)
+        fcn_model = FCNN(num_classes, input_height, input_width, pretrained_cnn=cnn_model)
+    else:
+        fcn_model = FCNN(num_classes, input_height, input_width)
+
+    return fcn_model
+
+# # 사용 예시
+# num_classes = 10  # 실제 클래스 개수로 변경
+# input_height = 224 # input image의 height
+# input_width = 224 # input image의 width
+
+# # 1. pretrained model 없이 FCN 생성
+# fcn_model = create_fcn_transfer_model(num_classes, input_height, input_width)
+
+# # 2. pretrained model 기반 FCN 생성
+# pretrained_model_path = 'pretrained_model.pth'  # pre-training된 모델 경로
+# fcn_model_transfer = create_fcn_transfer_model(num_classes, input_height, input_width, pretrained_model_path=pretrained_model_path)
+
+# # 모델 사용
+# # input_image = torch.randn(1, 3, input_height, input_width)  # 예시 입력 이미지
+# # output = fcn_model(input_image)  # 모델 실행
+# # print(output.shape)  # 출력 크기 확인

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
-from models.convnet import ConvNet  # ConvNet 클래스 임포트
+from models.convnet import *  # 모델 임포트
 from tqdm import tqdm
 import os
 from PIL import Image
@@ -102,24 +102,37 @@ def main():
     num_classes = len(train_dataset.classes)  # classes 리스트의 길이로 계산
     print(f'감지된 클래스 수: {num_classes}')
     
-    # 모델 초기화
-    model = ConvNet(num_classes, input_height, input_width).to(device)  # 모델을 장치로 이동
+    # pre-training된 모델 경로 설정
+    pretrained_model_path = "trained_model.pth"
+    
+    ##################################################################
+    # # 기존 ConvNet으로 전이 학습
+    ##################################################################
+    # # 모델 초기화
+    # model = ConvNet(num_classes, input_height, input_width).to(device)  # 모델을 장치로 이동
+    
+    # # 기존 모델 가중치 로드 (학습된 모델의 경로)
+    # # fc3 레이어를 제외하고 나머지 레이어의 가중치만 로드
+    # pretrained_dict = torch.load(pretrained_model_path, weights_only=True)
+    # model_dict = model.state_dict()
 
-    # 기존 모델 가중치 로드 (학습된 모델의 경로)
-    # fc3 레이어를 제외하고 나머지 레이어의 가중치만 로드
-    pretrained_dict = torch.load('trained_model.pth', weights_only=True)
-    model_dict = model.state_dict()
+    # # 기존 가중치에서 fc1, fc2, fc3를 제외한 나머지 가중치만 업데이트
+    # # pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict and 'fc3' not in k}
+    # pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict and 'fc1' not in k and 'fc2' not in k and 'fc3' not in k}
+    # model_dict.update(pretrained_dict)
+    # model.load_state_dict(model_dict, strict=False) # strict=False로 설정하여 불일치 허용
 
-    # 기존 가중치에서 fc1, fc2, fc3를 제외한 나머지 가중치만 업데이트
-    # pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict and 'fc3' not in k}
-    pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict and 'fc1' not in k and 'fc2' not in k and 'fc3' not in k}
-    model_dict.update(pretrained_dict)
-    model.load_state_dict(model_dict, strict=False) # strict=False로 설정하여 불일치 허용
-
-    # 마지막 레이어 수정 (전이 학습을 위해)
-    model.fc1 = nn.Linear(model.flattened_size, 512).to(device)  # fc1 수정
-    model.fc2 = nn.Linear(512, 128).to(device)  # fc2 수정
-    model.fc3 = nn.Linear(128, num_classes).to(device)  # fc3 수정
+    # # 마지막 레이어 수정 (전이 학습을 위해)
+    # model.fc1 = nn.Linear(model.flattened_size, 512).to(device)  # fc1 수정
+    # model.fc2 = nn.Linear(512, 128).to(device)  # fc2 수정
+    # model.fc3 = nn.Linear(128, num_classes).to(device)  # fc3 수정
+    ##################################################################
+    
+    ##################################################################
+    # # FCN model로 전이 학습 테스트
+    ##################################################################
+    model = create_fcn_transfer_model(num_classes, input_height, input_width, pretrained_model_path=pretrained_model_path)
+    ##################################################################
 
     # 옵티마이저 및 손실 함수 설정
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
