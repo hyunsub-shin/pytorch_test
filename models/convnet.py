@@ -10,11 +10,11 @@ class ConvNet(nn.Module):
         self.layer1 = nn.Sequential(
             # (ex): [3,28,28] -> [32,28,28]
             # out = (input - kernel + 2*padding)/stride + 1 : 28 -> 28
-            nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1), #흑백 이미지의 경우 1, 컬러 이미지의 경우 3
+            nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False), #흑백 이미지의 경우 1, 컬러 이미지의 경우 3
             nn.BatchNorm2d(32),
             nn.ReLU(),
             # [32,28,28] -> [64,28,28]
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             # [64,28,28] -> [64,14,14]
@@ -24,11 +24,11 @@ class ConvNet(nn.Module):
         )
         self.layer2 = nn.Sequential(
             # [64,14,14] -> [128,14,14]
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(128),
             nn.ReLU(),
             # [128,14,14] -> [256,14,14]
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(256),
             nn.ReLU(),
             # [256,14,14] -> [256,7,7]
@@ -37,11 +37,11 @@ class ConvNet(nn.Module):
         )
         self.layer3 = nn.Sequential(
             # [256,7,7] -> [512,7,7]
-            nn.Conv2d(256, 512, kernel_size=5, stride=1, padding=2),
+            nn.Conv2d(256, 512, kernel_size=5, stride=1, padding=2, bias=False),
             nn.BatchNorm2d(512),
             nn.ReLU(),
             # [512,7,7] -> [1024,7,7]
-            nn.Conv2d(512, 1024, kernel_size=5, stride=1, padding=2),
+            nn.Conv2d(512, 1024, kernel_size=5, stride=1, padding=2, bias=False),
             nn.BatchNorm2d(1024),
             nn.ReLU(),
             # [1024,7,7] -> [1024,3,3]
@@ -101,4 +101,35 @@ class ConvNet(nn.Module):
         out = self.dropout(out)
         out = self.fc3(out)     #마지막 레이어에는 dropout 적용하지 않음
         
+        return out
+
+class FCN(nn.Module):
+    def __init__(self, num_classes):
+        super(FCN, self).__init__()
+        # Convolutional Layers
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, padding=1)
+        self.relu1 = nn.ReLU(inplace=True)
+        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.conv2 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+        self.relu2 = nn.ReLU(inplace=True)
+        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        # 1x1 Convolutional Layers (FC Layer 대체)
+        self.conv3 = nn.Conv2d(128, num_classes, kernel_size=1)
+
+        # Upsampling Layer (Deconvolution)
+        self.upsample = nn.ConvTranspose2d(num_classes, num_classes, kernel_size=4, stride=2, padding=1)
+
+    def forward(self, x):
+        # Convolutional Layers
+        out = self.pool1(self.relu1(self.conv1(x)))
+        out = self.pool2(self.relu2(self.conv2(out)))
+
+        # 1x1 Convolutional Layer
+        out = self.conv3(out)
+
+        # Upsampling
+        out = self.upsample(out)
+
         return out
