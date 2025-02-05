@@ -138,18 +138,25 @@ class FCN(nn.Module):
 
 # transfer FCN(if pretrained_cnn) or ConvNet + FCN(if not pretrained_cnn)
 class FCNN(nn.Module):
-    def __init__(self, num_classes, input_height, input_width, pretrained_cnn=None):
+    def __init__(self, num_classes, input_height, input_width, convnet_out_ch_num, pretrained_cnn=None):
         super(FCNN, self).__init__()
 
         if pretrained_cnn:
             # retrained model이 있을 경우 pretrained model layer를 가져옴
             self.features = nn.Sequential(*list(pretrained_cnn.children())[:-3])    # 마지막 fc layer 3개 제거
         else:
+            # ConvNet 인스턴스 생성
+            temp_cnn = ConvNet(num_classes, input_height, input_width)
+
             # ConvNet의 convolutional layer 부분 복사 (layer1, layer2, layer3)
-            self.features = nn.Sequential()
+            self.features = nn.Sequential(
+                temp_cnn.layer1,
+                temp_cnn.layer2,
+                temp_cnn.layer3
+            )
 
         # 1x1 Convolution Layer (FC Layer 대체) - 채널 수 조절
-        self.conv4 = nn.Conv2d(1024, 512, kernel_size=1)  # 채널 수 1024 -> 512
+        self.conv4 = nn.Conv2d(convnet_out_ch_num, 512, kernel_size=1)  # 채널 수 1024 -> 512
         self.relu4 = nn.ReLU(inplace=True)
         self.dropout4 = nn.Dropout2d(0.3)
 
@@ -188,15 +195,17 @@ class FCNN(nn.Module):
         return out
 
 def create_fcn_transfer_model(num_classes, input_height, input_width, pretrained_model_path=None):
-    # 1. ConvNet 모델 생성 (pre-training된 weight가 있다면 load)
+    cnn_model = ConvNet(num_classes, input_height, input_width) # ConvNet 인스턴스 생성
+    convnet_out_ch_num = cnn_model.out_ch_num # ConvNet의 out_ch_num 가져오기
+    
+    # pre-training된 weight가 있다면 load
     if pretrained_model_path:
-        cnn_model = ConvNet(num_classes, input_height, input_width) # num_classes는 임시 값
         cnn_model.load_state_dict(torch.load(pretrained_model_path))
 
         # FCN 모델 생성 (ConvNet의 convolutional layer 부분 복사)
-        fcn_model = FCNN(num_classes, input_height, input_width, pretrained_cnn=cnn_model)
+        fcn_model = FCNN(num_classes, input_height, input_width, convnet_out_ch_num, pretrained_cnn=cnn_model)
     else:
-        fcn_model = FCNN(num_classes, input_height, input_width)
+        fcn_model = FCNN(num_classes, input_height, input_width, convnet_out_ch_num)
 
     return fcn_model
 
