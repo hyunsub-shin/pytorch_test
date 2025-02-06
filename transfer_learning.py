@@ -135,7 +135,7 @@ def main():
     # # FCN model로 전이 학습 테스트
     ##################################################################
     # model = create_fcn_transfer_model(num_classes, input_height, input_width, pretrained_model_path=pretrained_model_path).to(device)
-    model = FCN(num_classes)
+    model = FCN(num_classes).to(device)
     ##################################################################
 
     # 옵티마이저 및 손실 함수 설정
@@ -159,9 +159,8 @@ def main():
 
             # 순전파
             outputs = model(images)
-            print(outputs.shape)
-            print(labels.shape)
-            loss = criterion(outputs.squeeze(), labels) / accumulation_steps
+                      
+            loss = criterion(outputs, labels) / accumulation_steps
 
             # 역전파
             loss.backward()
