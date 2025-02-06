@@ -141,7 +141,9 @@ class FCN(nn.Module):
         
         # # Adaptive Average Pooling 추가
         # # 입력 텐서의 크기에 관계없이 출력 텐서의 크기를 (batch_size, num_channels, 1, 1)로 만듦
-        out = self.global_avg_pool(out) # GAP layer 통과          
+        out = self.global_avg_pool(out) # GAP layer 통과 
+        
+        # criterion = nn.CrossEntropyLoss() 의 tensor size에 맞게 변경        
         out = torch.flatten(out, 1)  # Flatten     
 
         return out
@@ -208,6 +210,8 @@ class FCNN(nn.Module):
         
         # Adaptive Average Pooling 적용
         out = self.avgpool(out)
+        
+        # criterion = nn.CrossEntropyLoss() 의 tensor size에 맞게 변경
         out = torch.flatten(out, 1)  # Flatten
 
         return out

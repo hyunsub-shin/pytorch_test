@@ -106,7 +106,7 @@ def main():
     print(f'감지된 클래스 수: {num_classes}')
     
     # pre-training된 모델 경로 설정
-    pretrained_model_path = None#"trained_model.pth"
+    pretrained_model_path = "trained_model.pth"
         
     ##################################################################
     # # 기존 ConvNet으로 전이 학습
@@ -159,10 +159,6 @@ def main():
 
             # 순전파
             outputs = model(images)
-            
-            # FCN 모델에서는 출력이 (배치 크기, 클래스 수, 높이, 너비)로 나옵니다.
-            # CrossEntropyLoss는 출력 텐서가 [배치 크기, 클래스 수, 높이, 너비]이고
-            # 레이블이 [배치 크기, 높이, 너비]이어야 합니다.
                       
             loss = criterion(outputs, labels) / accumulation_steps
 
