@@ -2,7 +2,8 @@
 venv_*/
 data/
 predict.py
-# *.pth
+학습결과/
+*.pth
 # *.png
 # *.jpg
 # *.jpeg
