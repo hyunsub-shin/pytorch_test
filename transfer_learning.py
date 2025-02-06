@@ -51,6 +51,9 @@ def main():
         font_name = 'AppleGothic'
     else:
         font_name = 'NanumGothic'
+        
+    plt.rc('font', family=font_name)
+    plt.rcParams['axes.unicode_minus'] = False
 
     # GPU 사용 가능 여부 확인 및 장치 설정
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -64,7 +67,7 @@ def main():
     input_width = 28    # ConvNet 입력 size
 
     num_epochs = 10
-    batch_size = 128
+    batch_size = 64
     learning_rate = 0.0001
     accumulation_steps = 1  # 그래디언트 누적 스텝 수
     ################################################
@@ -103,8 +106,8 @@ def main():
     print(f'감지된 클래스 수: {num_classes}')
     
     # pre-training된 모델 경로 설정
-    pretrained_model_path = "trained_model.pth"
-    
+    pretrained_model_path = None#"trained_model.pth"
+        
     ##################################################################
     # # 기존 ConvNet으로 전이 학습
     ##################################################################
@@ -131,7 +134,8 @@ def main():
     ##################################################################
     # # FCN model로 전이 학습 테스트
     ##################################################################
-    model = create_fcn_transfer_model(num_classes, input_height, input_width, pretrained_model_path=pretrained_model_path)
+    # model = create_fcn_transfer_model(num_classes, input_height, input_width, pretrained_model_path=pretrained_model_path).to(device)
+    model = FCN(num_classes)
     ##################################################################
 
     # 옵티마이저 및 손실 함수 설정
@@ -155,7 +159,9 @@ def main():
 
             # 순전파
             outputs = model(images)
-            loss = criterion(outputs, labels) / accumulation_steps
+            print(outputs.shape)
+            print(labels.shape)
+            loss = criterion(outputs.squeeze(), labels) / accumulation_steps
 
             # 역전파
             loss.backward()

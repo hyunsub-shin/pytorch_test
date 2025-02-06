@@ -166,9 +166,13 @@ class FCNN(nn.Module):
 
         self.classifier = nn.Conv2d(256, num_classes, kernel_size=1) # 마지막 채널은 num_classes
 
-        # Upsampling Layer (Deconvolution) - 필요에 따라 조절
-        self.upsample = nn.ConvTranspose2d(num_classes, num_classes, kernel_size=16, stride=8, padding=4) # kernel size, stride, padding 조절
+        # # Upsampling Layer (Deconvolution) - 필요에 따라 조절
+        # self.upsample = nn.ConvTranspose2d(num_classes, num_classes, kernel_size=16, stride=8, padding=4) # kernel size, stride, padding 조절
 
+        # Adaptive Average Pooling 추가
+        # 입력 텐서의 크기에 관계없이 출력 텐서의 크기를 (batch_size, num_channels, 1, 1)로 만듦
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        
         # 입력 이미지 크기 저장
         self.input_height = input_height
         self.input_width = input_width
@@ -189,8 +193,12 @@ class FCNN(nn.Module):
         # Classification (1x1 conv)
         out = self.classifier(out)
 
-        # Upsampling
-        out = self.upsample(out)
+        # # Upsampling
+        # out = self.upsample(out)
+        
+        # Adaptive Average Pooling 적용
+        out = self.avgpool(out)
+        out = torch.flatten(out, 1)  # Flatten
 
         return out
 
@@ -200,7 +208,7 @@ def create_fcn_transfer_model(num_classes, input_height, input_width, pretrained
     
     # pre-training된 weight가 있다면 load
     if pretrained_model_path:
-        cnn_model.load_state_dict(torch.load(pretrained_model_path))
+        cnn_model.load_state_dict(torch.load(pretrained_model_path, weights_only=True))
 
         # FCN 모델 생성 (ConvNet의 convolutional layer 부분 복사)
         fcn_model = FCNN(num_classes, input_height, input_width, convnet_out_ch_num, pretrained_cnn=cnn_model)
