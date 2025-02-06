@@ -63,7 +63,7 @@ def main():
     
     ################################################
     # 하이퍼파라미터 설정    
-    input_height = 28   # ConvNet 입력 size
+    input_height = 10   # ConvNet 입력 size
     input_width = 28    # ConvNet 입력 size
 
     num_epochs = 10

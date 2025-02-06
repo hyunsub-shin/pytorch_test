@@ -2,7 +2,7 @@
 venv_*/
 data/
 predict.py
-*.pth
+# *.pth
 # *.png
 # *.jpg
 # *.jpeg
