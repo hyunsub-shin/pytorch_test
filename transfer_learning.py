@@ -113,7 +113,6 @@ def main():
     model = ConvNet(num_classes, input_height, input_width).to(device)  # 모델을 장치로 이동
     
     # 기존 모델 가중치 로드 (학습된 모델의 경로)
-    # fc3 레이어를 제외하고 나머지 레이어의 가중치만 로드
     pretrained_dict = torch.load(pretrained_model_path, weights_only=True)
     model_dict = model.state_dict()
 
