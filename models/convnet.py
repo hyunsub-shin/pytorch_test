@@ -120,8 +120,8 @@ class FCN(nn.Module):
         # 1x1 Convolutional Layers (FC Layer 대체)
         self.conv3 = nn.Conv2d(128, num_classes, kernel_size=1)
 
-        # Upsampling Layer (Deconvolution)
-        self.upsample = nn.ConvTranspose2d(num_classes, num_classes, kernel_size=4, stride=2, padding=1)
+        # # Upsampling Layer (Deconvolution)
+        # self.upsample = nn.ConvTranspose2d(num_classes, num_classes, kernel_size=4, stride=2, padding=1)
         
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1)) # GAP layer 추가
 
@@ -133,15 +133,16 @@ class FCN(nn.Module):
         # 1x1 Convolutional Layer
         out = self.conv3(out)
 
-        # Upsampling
-        out = self.upsample(out)
+        # # Upsampling
+        # out = self.upsample(out)
         
-        # FCN 출력 크기 조정 (interpolation 사용)
-        out = torch.nn.functional.interpolate(out, size=(x.size(2), x.size(3)), mode='bilinear', align_corners=False)
+        # # FCN 출력 크기 조정 (interpolation 사용)
+        # out = F.interpolate(out, size=(x.size(2), x.size(3)), mode='bilinear', align_corners=False)
         
-        # Adaptive Average Pooling 추가
-        # 입력 텐서의 크기에 관계없이 출력 텐서의 크기를 (batch_size, num_channels, 1, 1)로 만듦
-        out = self.global_avg_pool(out) # GAP layer 통과
+        # # Adaptive Average Pooling 추가
+        # # 입력 텐서의 크기에 관계없이 출력 텐서의 크기를 (batch_size, num_channels, 1, 1)로 만듦
+        out = self.global_avg_pool(out) # GAP layer 통과          
+        out = torch.flatten(out, 1)  # Flatten     
 
         return out
 

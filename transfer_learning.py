@@ -159,6 +159,10 @@ def main():
 
             # 순전파
             outputs = model(images)
+            
+            # FCN 모델에서는 출력이 (배치 크기, 클래스 수, 높이, 너비)로 나옵니다.
+            # CrossEntropyLoss는 출력 텐서가 [배치 크기, 클래스 수, 높이, 너비]이고
+            # 레이블이 [배치 크기, 높이, 너비]이어야 합니다.
                       
             loss = criterion(outputs, labels) / accumulation_steps
 
