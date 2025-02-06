@@ -123,9 +123,9 @@ def main():
     model.load_state_dict(model_dict, strict=False) # strict=False로 설정하여 불일치 허용
 
     # 마지막 레이어 수정 (전이 학습을 위해)
-    model.fc1 = nn.Linear(model.flattened_size, 512).to(device)  # fc1 수정
-    model.fc2 = nn.Linear(512, 128).to(device)  # fc2 수정
-    model.fc3 = nn.Linear(128, num_classes).to(device)  # fc3 수정
+    model.fc1 = nn.Linear(model.flattened_size, 1024).to(device)  # fc1 수정
+    model.fc2 = nn.Linear(1024, 254).to(device)  # fc2 수정
+    model.fc3 = nn.Linear(254, num_classes).to(device)  # fc3 수정
     #################################################################
     
     # 옵티마이저 및 손실 함수 설정
