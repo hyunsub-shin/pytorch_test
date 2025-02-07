@@ -72,7 +72,7 @@ def main():
     
     ################################################
     # 하이퍼파라미터 설정
-    num_epochs = 10     # 에포크 수 조정
+    num_epochs = 20     # 에포크 수 조정
     batch_size = 32     # 배치 사이즈 조정 
     
     # 학습률 조정 0 ~ 1 사이의 작은 값 사용(예: 0.1, 0.01, 0.001, 0.0001, ...)
@@ -191,7 +191,7 @@ def main():
 
     # 모델 초기화
     model = ConvNet(num_classes, input_height, input_width).to(device)
-
+    
     # 손실 함수와 옵티마이저 정의
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate) # 옵티마이저 변경 테스트(Nesterov, Adadelta, RMSprop, FTRL)
