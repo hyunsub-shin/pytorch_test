@@ -28,8 +28,8 @@ class ConvNet(nn.Module):
             nn.BatchNorm2d(128),
             nn.ReLU(),
             # [128,14,14] -> [256,14,14]
-            nn.Conv2d(128, 512, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.BatchNorm2d(512),
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(256),
             nn.ReLU(),
             # [256,14,14] -> [256,7,7]
             nn.MaxPool2d(2),    # 두 번째 pooling layer
@@ -37,12 +37,11 @@ class ConvNet(nn.Module):
         )
         self.layer3 = nn.Sequential(
             # [256,7,7] -> [512,7,7]
-            # out = (input - kernel + 2*padding)/stride + 1 : 28 -> 28
-            nn.Conv2d(512, 1024, kernel_size=3, stride=1, padding=1, bias=True),
-            nn.BatchNorm2d(1024),
+            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.BatchNorm2d(512),
             nn.ReLU(),
             # [512,7,7] -> [1024,7,7]
-            nn.Conv2d(1024, 1024, kernel_size=3, stride=1, padding=1, bias=True),
+            nn.Conv2d(512, 1024, kernel_size=3, stride=1, padding=1, bias=True),
             nn.BatchNorm2d(1024),
             nn.ReLU(),
             # [1024,7,7] -> [1024,3,3]
@@ -76,9 +75,9 @@ class ConvNet(nn.Module):
         self.flattened_size = self.out_ch_num * (input_height // 8) * (input_width // 8)
         
         # FC 레이어 설정
-        self.fc1 = nn.Linear(self.flattened_size, 512)  
-        self.fc2 = nn.Linear(512, 512)
-        self.fc3 = nn.Linear(512, num_classes)
+        self.fc1 = nn.Linear(self.flattened_size, 4096)  
+        self.fc2 = nn.Linear(4096, 2048)
+        self.fc3 = nn.Linear(2048, num_classes)
 
         # FC 레이어용 Dropout
         self.dropout = nn.Dropout(0.5) # FC 레이어는 더 높은 dropout 비율 사용
@@ -88,14 +87,10 @@ class ConvNet(nn.Module):
         out = self.layer1(x)
         out = self.layer2(out)
         out = self.layer3(out)
-        # # for debug
-        # print(f'layer3 out = {out.shape}')  # 전체 shape 출력
         
-        # # Flatten
-        # # out.size(0) => batch_size를 나타냄: 배치사이즈 제거
+        # Flatten
+        # out.size(0) => batch_size를 나타냄
         out = out.view(out.size(0), -1)
-        # # for debug
-        # print(f'flatten out = {out.shape}')
         
         # FC 레이어 통과
         out = self.fc1(out)

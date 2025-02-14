@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
-from models.convnet import *  # 모델 임포트
+from models.convnet import ConvNet  # ConvNet 클래스 임포트
 from tqdm import tqdm
 import os
 from PIL import Image
@@ -51,10 +51,10 @@ def main():
         font_name = 'AppleGothic'
     else:
         font_name = 'NanumGothic'
-        
+
     plt.rc('font', family=font_name)
     plt.rcParams['axes.unicode_minus'] = False
-
+    
     # GPU 사용 가능 여부 확인 및 장치 설정
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # device = torch.device('cpu') # cuda 사용시 blue screen 발생
@@ -63,12 +63,12 @@ def main():
     
     ################################################
     # 하이퍼파라미터 설정    
-    input_height = 10   # ConvNet 입력 size
-    input_width = 28    # ConvNet 입력 size
+    input_height = 32   # ConvNet 입력 size
+    input_width = 32    # ConvNet 입력 size
 
-    num_epochs = 10
+    num_epochs = 20
     batch_size = 64
-    learning_rate = 0.0001
+    learning_rate = 0.001
     accumulation_steps = 1  # 그래디언트 누적 스텝 수
     ################################################
     
@@ -105,15 +105,11 @@ def main():
     num_classes = len(train_dataset.classes)  # classes 리스트의 길이로 계산
     print(f'감지된 클래스 수: {num_classes}')
     
-    # pre-training된 모델 경로 설정
-    pretrained_model_path = "trained_model.pth"
-        
-    #################################################################
     # 모델 초기화
     model = ConvNet(num_classes, input_height, input_width).to(device)  # 모델을 장치로 이동
-    
+
     # 기존 모델 가중치 로드 (학습된 모델의 경로)
-    pretrained_dict = torch.load(pretrained_model_path, weights_only=True)
+    pretrained_dict = torch.load('trained_model.pth', weights_only=True)
     model_dict = model.state_dict()
 
     # 기존 가중치에서 fc1, fc2, fc3를 제외한 나머지 가중치만 업데이트
@@ -123,11 +119,10 @@ def main():
     model.load_state_dict(model_dict, strict=False) # strict=False로 설정하여 불일치 허용
 
     # 마지막 레이어 수정 (전이 학습을 위해)
-    model.fc1 = nn.Linear(model.flattened_size, 1024).to(device)  # fc1 수정
-    model.fc2 = nn.Linear(1024, 254).to(device)  # fc2 수정
-    model.fc3 = nn.Linear(254, num_classes).to(device)  # fc3 수정
-    #################################################################
-    
+    model.fc1 = nn.Linear(model.flattened_size, 4096).to(device)  # fc1 수정
+    model.fc2 = nn.Linear(4096, 2048).to(device)  # fc2 수정
+    model.fc3 = nn.Linear(2048, num_classes).to(device)  # fc3 수정
+
     # 옵티마이저 및 손실 함수 설정
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.CrossEntropyLoss()
@@ -149,7 +144,6 @@ def main():
 
             # 순전파
             outputs = model(images)
-                      
             loss = criterion(outputs, labels) / accumulation_steps
 
             # 역전파
